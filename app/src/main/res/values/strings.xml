@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">My Ambulance</string>
+    <string name="title_activity_main">My Ambulance</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_emergency_request">Emergency Request</string>
+
+    <string name="blood_group">Select Blood Group</string>
+
+    <string-array name="blood_group">
+        <item>A+</item>
+        <item>A-</item>
+        <item>B+</item>
+        <item>B-</item>
+        <item>O+</item>
+        <item>O-</item>
+        <item>AB+</item>
+        <item>AB-</item>
+    </string-array>
+
+</resources>
