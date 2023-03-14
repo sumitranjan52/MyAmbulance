@@ -6,14 +6,18 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.ambulance.rider.BookRideFragment;
 import com.ambulance.rider.Common.Common;
 import com.ambulance.rider.MainActivity;
 import com.ambulance.rider.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.Map;
 
 /**
  * Created by sumit on 18-Mar-18.
@@ -28,18 +32,33 @@ public class FCMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
         try {
-            if (remoteMessage.getData() != null) {
-                title = remoteMessage.getData().get("title");
-                body = remoteMessage.getData().get("body");
+            Map<String, String> remoteData = remoteMessage.getData();
+            if (remoteData == null) {
+                return;
             }
+            title = remoteData.get("title");
+            String[] bodies = remoteData.get("body").split("##@@##");
+            body = bodies[0];
 
             Log.d("onMessageReceived: ", title + " " + body);
 
             if (!body.isEmpty() && (body.equals("Request cancelled") || body.equals("You reached your destination"))) {
                 Common.isBooked = false;
+                Common.isBookingAccepted = false;
                 Common.emergencyRequestBookingID = "";
                 showNotification(title, body);
                 MainActivity.fragmentManager.popBackStack();
+            } else if (!body.isEmpty() && ("Your request is accepted".equals(body))) {
+                Common.isBooked = true;
+                Common.isBookingAccepted = true;
+                Common.driverName = bodies[1];
+                Common.ambulanceNo = bodies[2];
+                Common.driverPhone = bodies[3];
+                showNotification(title, body);
+                Fragment fragment = MainActivity.fragmentManager.findFragmentByTag("bookRideFrag");
+                if(fragment instanceof BookRideFragment) {
+                    ((BookRideFragment) fragment).populateDriverDetails();
+                }
             } else if (!body.isEmpty()) {
                 showNotification(title, body);
             }
