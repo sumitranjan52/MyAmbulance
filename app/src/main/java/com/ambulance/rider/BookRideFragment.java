@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -57,9 +58,9 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
     private MapView mMapView;
     private GoogleMap mMap;
 
-    private LinearLayout beforeBooking, afterBooking;
+    private LinearLayout beforeBooking, betweenBookAccept, afterBooking;
     private TextView driverName, driverPhone, driverVehicle, cancelRide;
-    private Button btnConfirmBooking;
+    private Button btnConfirmBooking, btnCancelBooking;
 
     private Context mContext;
     private Activity activity;
@@ -100,21 +101,25 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
         View view = inflater.inflate(R.layout.fragment_book_ride, container, false);
 
         beforeBooking = view.findViewById(R.id.beforeBooking);
+        betweenBookAccept = view.findViewById(R.id.betweenBookAccept);
         afterBooking = view.findViewById(R.id.afterBooking);
         driverName = view.findViewById(R.id.driverDetails);
         driverPhone = view.findViewById(R.id.callDriver);
         driverVehicle = view.findViewById(R.id.vehicleDetails);
         cancelRide = view.findViewById(R.id.cancelRide);
         btnConfirmBooking = view.findViewById(R.id.btnConfirmBook);
+        btnCancelBooking = view.findViewById(R.id.btnCancelBook);
 
         driverPhone.setOnClickListener(this);
         cancelRide.setOnClickListener(this);
         btnConfirmBooking.setOnClickListener(this);
+        btnCancelBooking.setOnClickListener(this);
 
-        if (Common.isBooked){
+        if (Common.isBooked && Common.isBookingAccepted){
             driverName.setText(Common.driverName);
             driverVehicle.setText(Common.ambulanceNo);
             beforeBooking.setVisibility(View.GONE);
+            betweenBookAccept.setVisibility(View.GONE);
             afterBooking.setVisibility(View.VISIBLE);
         }
 
@@ -186,6 +191,7 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
                 fnBookRide(userId);
                 break;
 
+            case R.id.btnCancelBook:
             case R.id.cancelRide:
                 dialog = (new AlertDialogBox(mContext)).dialogBuilderWithoutAction("Cancelling ambulance request", "Please wait...", false);
                 fnCancelRide(userId);
@@ -215,6 +221,7 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
                 dialog.dismiss();
                 if (response.has("response")) {
                     Common.isBooked = false;
+                    Common.isBookingAccepted = false;
                     stopTracking();
                     MainActivity.fragmentManager.popBackStack();
                 } else {
@@ -244,7 +251,19 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
 
     }
 
-
+    public void populateDriverDetails() {
+        driverName.setText(Common.driverName);
+        driverVehicle.setText(Common.ambulanceNo);
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                beforeBooking.setVisibility(View.GONE);
+                betweenBookAccept.setVisibility(View.GONE);
+                afterBooking.setVisibility(View.VISIBLE);
+            }
+        });
+        startTracking();
+    }
     private void fnBookRide(String userId) {
 
         RideRequest rideRequest = new RideRequest();
@@ -260,16 +279,17 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
                     try {
                         JSONObject jsonObject = response.getJSONObject("response");
                         Common.emergencyRequestBookingID = jsonObject.getString("id");
-                        driverName.setText(Common.driverName = jsonObject.getString("driverName"));
-                        driverVehicle.setText(Common.ambulanceNo = jsonObject.getString("driverVehicle"));
-                        Common.driverPhone = jsonObject.getString("driverPhone");
+//                        driverName.setText(Common.driverName = jsonObject.getString("driverName"));
+//                        driverVehicle.setText(Common.ambulanceNo = jsonObject.getString("driverVehicle"));
+//                        Common.driverPhone = jsonObject.getString("driverPhone");
                         activity.setTitle("Ambulance Booked");
-                        startTracking();
+//                        startTracking();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                     beforeBooking.setVisibility(View.GONE);
-                    afterBooking.setVisibility(View.VISIBLE);
+                    betweenBookAccept.setVisibility(View.VISIBLE);
+                    afterBooking.setVisibility(View.GONE);
                     Common.isBooked = true;
 
                 } else {
@@ -363,7 +383,7 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
     @Override
     public void onPause() {
         super.onPause();
-        if (Common.isBooked){
+        if (Common.isBooked && Common.isBookingAccepted){
             stopTracking();
         }
     }
@@ -371,7 +391,7 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
     @Override
     public void onResume() {
         super.onResume();
-        if (Common.isBooked){
+        if (Common.isBooked && Common.isBookingAccepted){
             startTracking();
         }
     }

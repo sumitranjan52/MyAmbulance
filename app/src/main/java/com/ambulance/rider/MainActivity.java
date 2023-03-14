@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
             if (!item.isChecked()){
-                Intent email = new Intent(Intent.ACTION_SENDTO,Uri.parse("mailto:sumitranjan52@gmail.com"));
+                Intent email = new Intent(Intent.ACTION_SENDTO,Uri.parse("mailto:webmasterprotocol@gmail.com"));
                 email.putExtra(Intent.EXTRA_SUBJECT,"MyAmbulance - Support");
                 email.putExtra(Intent.EXTRA_TEXT,"Remove this line and write your message.");
                 startActivity(Intent.createChooser(email,"Choose"));

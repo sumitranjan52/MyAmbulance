@@ -61,11 +61,13 @@ public class DefaultActivity extends AppCompatActivity implements GoogleApiClien
             if (getIntent().getExtras().getString("body") != null) {
                 Log.d("REQUEST_NOTIFICATION", getIntent().getExtras().getString("body"));
                 String cancelled = getIntent().getExtras().getString("body");
-                if (cancelled.equals("Request cancelled")) {
+                if ("Request cancelled".equals(cancelled)) {
                     Common.isBooked = false;
+                    Common.isBookingAccepted = false;
                     Common.emergencyRequestBookingID = "";
-                } else if (cancelled.equals("You reached your destination")) {
+                } else if ("You reached your destination".equals(cancelled)) {
                     Common.isBooked = false;
+                    Common.isBookingAccepted = false;
                     Common.emergencyRequestBookingID = "";
                 }
             }
