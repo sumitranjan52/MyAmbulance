@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ambulance.rider.Backend.RideRequest;
 import com.ambulance.rider.Common.AlertDialogBox;
@@ -115,12 +116,17 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
         btnConfirmBooking.setOnClickListener(this);
         btnCancelBooking.setOnClickListener(this);
 
-        if (Common.isBooked && Common.isBookingAccepted){
-            driverName.setText(Common.driverName);
-            driverVehicle.setText(Common.ambulanceNo);
+        if (Common.isBooked){
             beforeBooking.setVisibility(View.GONE);
-            betweenBookAccept.setVisibility(View.GONE);
-            afterBooking.setVisibility(View.VISIBLE);
+            betweenBookAccept.setVisibility(View.VISIBLE);
+            afterBooking.setVisibility(View.GONE);
+            if(Common.isBookingAccepted) {
+                driverName.setText(Common.driverName);
+                driverVehicle.setText(Common.ambulanceNo);
+                beforeBooking.setVisibility(View.GONE);
+                betweenBookAccept.setVisibility(View.GONE);
+                afterBooking.setVisibility(View.VISIBLE);
+            }
         }
 
         mMapView = view.findViewById(R.id.map);
@@ -274,26 +280,21 @@ public class BookRideFragment extends Fragment implements OnMapReadyCallback, Vi
             @Override
             public void onSuccess(JSONObject response) {
                 dialog.dismiss();
-                if (response.has("response")) {
-
-                    try {
+                try {
+                    if (response.has("response")) {
                         JSONObject jsonObject = response.getJSONObject("response");
                         Common.emergencyRequestBookingID = jsonObject.getString("id");
-//                        driverName.setText(Common.driverName = jsonObject.getString("driverName"));
-//                        driverVehicle.setText(Common.ambulanceNo = jsonObject.getString("driverVehicle"));
-//                        Common.driverPhone = jsonObject.getString("driverPhone");
                         activity.setTitle("Ambulance Booked");
-//                        startTracking();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        beforeBooking.setVisibility(View.GONE);
+                        betweenBookAccept.setVisibility(View.VISIBLE);
+                        afterBooking.setVisibility(View.GONE);
+                        Common.isBooked = true;
+                    } else {
+                        Log.d("TAG", "onSuccess: " + response.toString());
+                        Toast.makeText(mContext, RideRequest.errorResponseMsg(response.getString("invalid")), Toast.LENGTH_SHORT).show();
                     }
-                    beforeBooking.setVisibility(View.GONE);
-                    betweenBookAccept.setVisibility(View.VISIBLE);
-                    afterBooking.setVisibility(View.GONE);
-                    Common.isBooked = true;
-
-                } else {
-                    Log.d("TAG", "onSuccess: " + response.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
 

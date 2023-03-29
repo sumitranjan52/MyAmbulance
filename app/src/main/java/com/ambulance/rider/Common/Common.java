@@ -14,7 +14,7 @@ public class Common {
     public static final String LOG_TAG = "RIDER";
 
     //public static final String BASE_URL = "http://hiva26.com/ambulanceapi/";
-    public static final String BASE_URL = "http://ec2-43-204-238-64.ap-south-1.compute.amazonaws.com/ambulanceapi/";
+    public static final String BASE_URL = "http://ec2-13-235-79-14.ap-south-1.compute.amazonaws.com/ambulanceapi/";
     public static final String RIDER_URL = "rider.php";
     public static final String TOKEN_URL = "fcm.php";
     public static final String LOCATION_URL = "driverLocation.php";
